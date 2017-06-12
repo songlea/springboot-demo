@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.songlea.springboot.demo.mapper.HostCompareModelMapper">
+    <select id="selectHostCompareByCondition"  resultMap="BaseResultMap">
+        SELECT ID,NAME,HOST_NAME,MANAGE_IP,CPU_FAMILY,OPERATE_SYSTEM,OS_VERSION,SERIAL_NUMBER,
+            MANUFACTURER_TEXT,PHYSICAL_CPUS,MEMORY_SIZE,DISK_COUNT,TOTAL_DISK_SIZE,HOST_ID,INM_COMPARE_STATE,
+            TO_CHAR(INM_SYNC_TIME,'yyyy-mm-dd hh24:mi:ss') INM_SYNC_TIME FROM CI_HOST_COMPARE WHERE INM_CHECK_STATUS = 1
+        <if test="name!=null and name!=''">
+            AND NAME LIKE '%${name}%'
+        </if>
+        <if test="compareStatus!=null and compareStatus!='-1'">
+            AND INM_COMPARE_STATE = ${compareStatus}
+        </if>
+        <if test="startTime!=null and startTime!=''">
+            AND INM_SYNC_TIME &gt;= TO_DATE(#{startTime},'yyyy-mm-dd hh24:mi:ss')
+        </if>
+        <if test="endTime!=null and endTime!=''">
+            AND INM_SYNC_TIME &lt;= TO_DATE(#{endTime}, 'yyyy-mm-dd hh24:mi:ss')
+        </if>
+        ORDER BY ${sort} ${order},ID DESC
+    </select>
+
+    <resultMap id="BaseResultMap" type="com.songlea.springboot.demo.model.HostCompareModel">
+        <id property="id" column="ID" />
+        <result property="name" column="NAME" />
+        <result property="hostId" column="HOST_ID" />
+        <result property="manageIp" column="MANAGE_IP" />
+        <result property="hostName" column="HOST_NAME" />
+        <result property="cpuFamily" column="CPU_FAMILY" />
+        <result property="operateSystem" column="OPERATE_SYSTEM" />
+        <result property="osVersion" column="OS_VERSION" />
+        <result property="serialNumber" column="SERIAL_NUMBER" />
+        <result property="manufacturerText" column="MANUFACTURER_TEXT" />
+        <result property="physicalCpus" column="PHYSICAL_CPUS" />
+        <result property="memorySize" column="MEMORY_SIZE" />
+        <result property="diskCount" column="DISK_COUNT" />
+        <result property="totalDiskSize" column="TOTAL_DISK_SIZE" />
+        <result property="inmCompareStatus" column="INM_COMPARE_STATE" />
+        <result property="inmSyncTime" column="INM_SYNC_TIME" />
+        <result property="inmCheckStatus" column="INM_CHECK_STATUS" />
+        <result property="inmCheckUser" column="INM_CHECK_USER" />
+        <result property="inmCheckTime" column="INM_CHECK_TIME"/>
+    </resultMap>
+</mapper>

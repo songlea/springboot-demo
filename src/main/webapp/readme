@@ -1,0 +1,1 @@
+webapp目录只在使用jsp模板时才需要,因为打成war包并放到tomcat或jetty中运行

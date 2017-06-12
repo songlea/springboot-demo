@@ -1,0 +1,107 @@
+<!-- thymeleaf常用基础知识点:
+1、在html页面中引入thymeleaf命名空间,即<html xmlns:th=http://www.thymeleaf.org></html>,此时在html模板文件中动态的属性使用th:命名空间修饰;
+2、引用静态资源文件,比如CSS和JS文件,语法格式为"@{}",如@{/js/blog/blog.js}会引入/static目录下的/js/blog/blog.js文件;
+3、访问spring-mvc中model的属性,语法格式为"${}",如${user.id}可以获取model里的user对象的id属性;
+4、循环,在html的标签中加入th:each="value:${list}"形式的属性,如<span th:each="user:${users}"></span>可以迭代users的数据;
+5、判断,在html标签中加入th:if="表达式"可以根据条件显示html元素;
+    <span th:if="${not #lists.isEmpty(blog.publishTime)}">
+        <span id="publishtime" th:text="${#dates.format(blog.publishTime, 'yyyy-MM-dd HH:mm:ss')}"></span>
+    </span>
+    以上代码表示若blog.publishTime时间不为空，则显示时间
+6、时间的格式化
+    ${#dates.format(blog.publishTime,'yyyy-MM-dd HH:mm:ss')}
+    表示将时间格式化为”yyyy-MM-dd HH:mm:ss”格式化写法与Java格式化Date的写法是一致的;
+7、字符串拼接,有两种形式
+    比如拼接这样一个URL:/blog/delete/{blogId}
+    第一种：th:href="'/blog/delete/' + ${blog.id }"
+    第二种：th:href="${'/blog/delete/' + blog.id }"
+注：标签要有结尾,如<input .../>
+    不要使用单属性如需要selected="selected"
+
+参考：http://blog.csdn.net/mygzs/article/details/52668099  thymeleaf的基础对象与web的访问方式
+#httpServletRequest :javax.servlet.http.HttpServletRequest对象实例;
+#httpSession：javax.servlet.http.HttpSession实例;
+#themes:提供和"spring:theme JSP tag."同样的功能;
+${@xxxBean.getUserName()}:直接访问spring注册对象;
+application：获取应用程序servlet上下文属性;
+session:访问session属性;
+param :获取请求的参数;
+#ctx :ctx对象继承org.thymeleaf.context.IContext或者org.thymeleaf.context.IWebContext,取决于当前环境是不是web环境,如果程序集成了spring,那么将会是org.thymeleaf.spring[3|4].context.SpringWebContext
+-->
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="utf-8"/>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1"/>
+    <title>Thymeleaf模板测试</title>
+    <link type="text/css" rel="stylesheet" th:href="@{/plugins/bootstrap-3.3.7/css/bootstrap.min.css}"/>
+    <link type="text/css" rel="stylesheet" th:href="@{/plugins/bootstrap-3.3.7/plugins/table-1.11.1/bootstrap-table.min.css}"/>
+    <link type="text/css" rel="stylesheet" th:href="@{/plugins/bootstrap-3.3.7/plugins/table-1.11.1/extensions/sticky-header/bootstrap-table-sticky-header.css}"/>
+    <link type="text/css" rel="stylesheet" th:href="@{/plugins/bootstrap-3.3.7/plugins/datetimepicker/css/bootstrap-datetimepicker.min.css}"/>
+    <link type="text/css" rel="stylesheet" th:href="@{/plugins/artDialog4.1.7/skins/black.css}"/>
+    <link type="text/css" rel="stylesheet" th:href="@{/css/demo.css}"/>
+    <!--[if lt IE 9]>
+    <script type="text/javascript" th:src="@{/plugins/html5shiv-3.7.3/html5shiv.min.js}"></script>
+    <script type="text/javascript" th:src="@{/plugins/respond-1.4.2/respond.min.js}"></script>
+    <![endif]-->
+</head>
+<body>
+<input type="hidden" id="urlPath" th:value="${#httpServletRequest.getContextPath()}"/>
+<div class="container">
+    <div class="row">
+        <span class="glyphicon glyphicon-star"></span> 使用的模板:<span class="lead">thymeleaf</span>
+    </div>
+    <div class="row">
+        <span class="glyphicon glyphicon-user"></span> 欢迎您:<span th:text="${loginUserCode}"></span>
+    </div>
+    <!--查询条件-->
+    <div class="row mt20">
+        <form class="form-inline">
+            <div class="form-group">
+                <label for="name">&nbsp;&nbsp;&nbsp;名称</label>
+                <input type="text" class="form-control" id="name" placeholder="请输入名称..."/>
+            </div>
+            <span>&nbsp;&nbsp;&nbsp;</span>
+            <div class="form-group">
+                <label for="compareStatus">同步状态</label>
+                <select class="form-control" id="compareStatus" name="compareStatus" style="min-width:120px;">
+                    <option value="-1" selected="selected">所有</option>
+                    <option value="1">新增</option>
+                    <option value="2">修改</option>
+                    <option value="3">删除</option>
+                </select>
+            </div>
+            <span>&nbsp;&nbsp;&nbsp;</span>
+            <div class="form-group">
+                <label for="syncStartTime">同步时间</label>
+                <input type="text" id="syncStartTime" name="syncStartTime" class="form-control input-append date form_datetime" style="min-width: 205px;"/>
+                <label for="syncEndTime">至</label>
+                <input type="text" id="syncEndTime" name="syncEndTime" class="form-control input-append date form_datetime" style="min-width: 205px;"/>
+            </div>
+            <span>&nbsp;&nbsp;&nbsp;</span>
+            <div class="form-group">
+                <button class="btn btn-info" type="button" id="selectBtn">
+                    <span class="glyphicon glyphicon-search"></span> 查询
+                </button>&nbsp;&nbsp;
+                <button class="btn btn-default" type="reset">
+                    <span class="glyphicon glyphicon-refresh"></span> 重置
+                </button>
+            </div>
+        </form>
+    </div>
+    <div class="table-responsive" id="syncHostTableDiv" style="min-height: 400px; margin-top: 10px;">
+        <table id="syncHostTableBody"></table>
+    </div>
+</div>
+<script type="text/javascript" th:src="@{/plugins/jquery-1.10.2.min.js}"></script>
+<script type="text/javascript" th:src="@{/plugins/bootstrap-3.3.7/js/bootstrap.min.js}"></script>
+<script type="text/javascript" th:src="@{/plugins/bootstrap-3.3.7/plugins/table-1.11.1/bootstrap-table.min.js}"></script>
+<script type="text/javascript" th:src="@{/plugins/bootstrap-3.3.7/plugins/table-1.11.1/locale/bootstrap-table-zh-CN.min.js}"></script>
+<script type="text/javascript" th:src="@{/plugins/bootstrap-3.3.7/plugins/datetimepicker/bootstrap-datetimepicker.min.js}"></script>
+<script type="text/javascript" th:src="@{/plugins/bootstrap-3.3.7/plugins/datetimepicker/locales/bootstrap-datetimepicker.zh-CN.js}"></script>
+<script type="text/javascript" th:src="@{/plugins/bootstrap-3.3.7/plugins/table-1.11.1/extensions/sticky-header/bootstrap-table-sticky-header.min.js}"></script>
+<script type="text/javascript" th:src="@{/plugins/artDialog4.1.7/artDialog.js}"></script>
+<script type="text/javascript" th:src="@{/js/demo.js}"></script>
+</body>
+</html>
